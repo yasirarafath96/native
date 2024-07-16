@@ -1,5 +1,3 @@
-// TodoList.js
-
 import React, { useState, useEffect } from "react";
 import {
   View,
@@ -9,11 +7,10 @@ import {
   FlatList,
   TouchableOpacity,
 } from "react-native";
-import firebaseAPI from "./firebaseConfig"; // Adjust path as necessary
-import { Grid, Col, Row } from "react-native-bootstrap-styles";
+import firebaseAPI from "./firebase";
 import { v4 as uuidv4 } from "uuid";
 
-const TodoList = () => {
+const TodoList = ({ navigation }) => {
   const [todos, setTodos] = useState([]);
   const [input, setInput] = useState("");
   const [editId, setEditId] = useState(null);
@@ -28,8 +25,8 @@ const TodoList = () => {
       const response = await firebaseAPI.get("/todos.json");
       const data = response.data;
       if (data) {
-        const loadedTodos = Object.keys(data).map((key, index) => ({
-          id: (index + 1).toString(),
+        const loadedTodos = Object.keys(data).map((key) => ({
+          id: key,
           text: data[key].text,
         }));
         setTodos(loadedTodos);
@@ -43,10 +40,7 @@ const TodoList = () => {
     if (input.trim()) {
       const newId = uuidv4(); // Generate a unique ID
       try {
-        const response = await firebaseAPI.post("/todos.json", {
-          id: 1, // Include the generated ID
-          text: input,
-        });
+        await firebaseAPI.post("/todos.json", { text: input });
         const newTodo = { id: newId, text: input };
         setTodos([...todos, newTodo]);
         setInput("");
@@ -87,6 +81,10 @@ const TodoList = () => {
 
   return (
     <View style={{ flex: 1, padding: 20, backgroundColor: "white" }}>
+      <Button
+        title="Go to Details"
+        onPress={() => navigation.navigate("Details")}
+      />
       <Text style={{ fontSize: 24, fontWeight: "bold", marginBottom: 10 }}>
         Todo List
       </Text>
